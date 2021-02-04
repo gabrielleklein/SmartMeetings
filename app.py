@@ -2,7 +2,7 @@ import os
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-client = WebClient(token="xoxb-1664119445540-1701240028835-rtuykxw8fdfFl0JbBxLvOmDh")
+client = WebClient(token="xoxp-1664119445540-1643181234759-1711827738771-d918ffb1c4aba0acb1953228da09f34f")
 
 conversation_history = []
 channel_id = "C01KC4QD951"
