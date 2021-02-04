@@ -1,10 +1,14 @@
 import os
-from slack_bolt import App
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
-app = App(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
-)
+client = WebClient(token="xoxb-1664119445540-1701240028835-rtuykxw8fdfFl0JbBxLvOmDh")
 
-if __name__ == "__main__":
-    app.start(port=int(os.environ.get("PORT", 3000)))
+conversation_history = []
+channel_id = "C01KC4QD951"
+
+try:
+    result = client.conversations_history(channel=channel_id)
+    print(result)
+except SlackApiError as e:
+    print(f"Error creating conversation: {e}")
