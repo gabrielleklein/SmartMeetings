@@ -17,5 +17,5 @@ Note: the Request URL at the above link is where ngrok routes incoming requests 
 running ./ngrok http 3000 again will change that URL and we will have to change it in Slack.
 
 ## Authorization Tokens
-OAuth Token & Bot Token here: https://api.slack.com/apps/A01LT5D4T7E/oauth?
+OAuth Token & Bot Token here: https://api.slack.com/apps/A01LT5D4T7E/oauth?  
 Signing Secret here: https://api.slack.com/apps/A01LT5D4T7E/general?
