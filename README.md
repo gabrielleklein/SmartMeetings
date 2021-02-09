@@ -18,5 +18,5 @@ running ./ngrok http 3000 again will change that URL and we will have to change 
 
 ## Authorization Tokens
 OAuth Token & Bot Token here: https://api.slack.com/apps/A01LT5D4T7E/oauth?  
-Signing Secret here: https://api.slack.com/apps/A01LT5D4T7E/general?
+Signing Secret here: https://api.slack.com/apps/A01LT5D4T7E/general?  
 Webhook Url here: https://api.slack.com/apps/A01LT5D4T7E/incoming-webhooks?success=1
