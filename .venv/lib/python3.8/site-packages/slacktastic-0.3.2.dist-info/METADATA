@@ -1,0 +1,163 @@
+Metadata-Version: 2.1
+Name: slacktastic
+Version: 0.3.2
+Summary: Package to send Statistics over a Slack Incoming Webhook
+Home-page: https://github.com/imperatus/slacktastic
+Author: Jurgen Buisman
+Author-email: jurgen@labela.nl
+License: MIT license
+Keywords: slacktastic
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.7
+Requires-Dist: requests
+
+===========
+slackistics
+===========
+
+Package to send Statistics over a Slack Incoming Webhook
+
+
+* Free software: MIT license
+
+
+Features
+--------
+
+* Send messages via Slack Incoming Webhook
+* Provides object-based templates for Messages, Attachments and Fields
+* Fine-grained control over Message formatting, and supports mrkdwn
+* Easily generate various charts based on your data. Supported types are:
+    * Bar Chart
+    * Line Chart
+    * Radar Chart
+    * Pie Chart
+    * Outer Pie Chart
+    * Donut Chart
+    * Radial Gauge
+
+
+Roadmap
+-------
+
+* Implement tests
+* Add extensive documentation
+* Add support for more chart types
+* Add templates for most commonly sent messages
+* Extend customisation to override webhook settings
+
+
+Credits
+-------
+
+Inspiration for this package occurred while trying to send statistics for projects in a uniform way to Slack channels for `Label A`_.
+
+.. _`Label A`: https://labela.nl
+
+This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+
+.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+
+This package makes use of the Quickchart.io_ to draw diagrams.
+
+.. _Quickchart.io: https://quickchart.io
+
+
+Usage
+-----
+.. code-block:: python
+
+    from slacktastic.client import SlackClient
+    from slacktastic.template import Attachment, PieChart, Message
+
+    client = SlackClient(webhook_url='YOUR WEBHOOK URL')
+    attachment = Attachment(
+        title='Cool block title',
+        title_link='https://labela.nl',
+        text='Some awesome text')
+
+    chart = PieChart(
+            title="Test data",
+            labels=['Ride', 'Reservation'],
+            values=[22, 55]
+        )
+
+    # You can now pass custom ChartJS options for all diagrams! See ChartJS docs
+    chart.set_options({
+        title: {
+        display: true,
+        text: 'Cool title',
+        fontColor: 'hotpink',  # For testing purposes only...
+        fontSize: 32,
+    })
+
+    another_chart = BarChart(
+            "Test data", labels=['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+            data={
+                'Test 1': [1, 2, 4, 8, 16],
+                'Test 2': [7, 3, 45, 1, 12],
+            }
+    )
+
+    # Customise the background colors of your data if you don't like our scheme
+    another_chart.set_background_colors([
+        "#000", "#3333", "#666", "#999", "#CCC"
+    ])
+
+    message = Message(
+        text="I want to show you some *magic* :sparkles:",
+        attachments=[attachment, chart]
+    )
+    client.send_message(message)
+
+
+=======
+History
+=======
+
+0.3.2 (2019-08-01)
+------------------
+
+* Added RadialGauge diagram
+
+0.3.1 (2019-08-01)
+------------------
+
+* Added OuterPieChart, the Pie chart with labels on the outside!
+
+0.3.0 (2019-07-31)
+------------------
+
+* Reworked class inheritance to limit amount of parameters passed around
+* Changed default background colors for all graphs
+* Added possibility supply own background colors for all graph types
+* Changed default label text on FoodChart diagrams such as Pie and Donut to make it more readable
+* Added possibility to override options of diagrams for fine grained control. Does not impose any restrictions currently!
+
+0.2.3 (2019-07-31)
+------------------
+
+* Updated documentation: added roadmap and features
+
+0.2.2 (2019-07-30)
+------------------
+
+* Removed invalid documentation link
+
+0.2.1 (2019-07-30)
+------------------
+
+* Added support for Donut, Bar, Line and Radar charts
+* Updated documentation
+
+0.1.0 (2019-07-25)
+------------------
+
+* First release on PyPI.
+
+
