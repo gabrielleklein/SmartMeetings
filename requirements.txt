@@ -1,0 +1,8 @@
+os
+slack_bolt
+slack_sdk
+slack_sdk.errors
+pandas
+json
+jsbeautifier
+re
