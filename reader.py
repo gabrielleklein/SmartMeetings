@@ -8,12 +8,11 @@ from slack_sdk.errors import SlackApiError
 import pandas as pd
 import io
 
-client = WebClient(token="xoxp-1664119445540-1643181234759-1696879914535-84e258c25d9ec7c1ecfd11f03f42cfa0")
+client = WebClient(token=os.getenv('token1'))
 
 app = App(
-    token=("xoxb-1664119445540-1701240028835-15Bzsi8TbnZ7773DkBw6qi1P"),
-    signing_secret=("94c1b74f6044d8382ca77173059da4eb")
-)
+    token=(os.getenv('token1')),
+    signing_secret=(os.getenv('token1'))
 
 def get_channel_message_history():
     conversation_history = []
