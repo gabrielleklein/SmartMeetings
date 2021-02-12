@@ -3,11 +3,11 @@ from slack_bolt import App
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
+client = WebClient(token="xoxp-1664119445540-1643181234759-1696879914535-84e258c25d9ec7c1ecfd11f03f42cfa0")
 
 app = App(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
+    token=("xoxb-1664119445540-1701240028835-15Bzsi8TbnZ7773DkBw6qi1P"),
+    signing_secret=("94c1b74f6044d8382ca77173059da4eb")
 )
 
 def get_channel_message_history():
