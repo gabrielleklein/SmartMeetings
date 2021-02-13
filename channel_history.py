@@ -62,40 +62,23 @@ def on_home_opened(say):
     messages = get_channel_message_history_as_df()
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity = analyze_channel_data(messages, users)
-    
     message_chart = PieChart(
         title="Channel Participation - Messages",
         labels=list(id_to_real_name.values()),
         values=list(count_messages.values())
     )
-    message_text = "Here's data on who has sent messages in channel #general"
-    message_message = Message(
-        text=message_text,
-        attachments=[message_chart]
-    )
-
     reaction_chart = PieChart(
         title="Channel Participation - Reactions",
         labels=list(id_to_real_name.values()),
         values=list(count_reactions.values())
     )
-    reaction_text = "Here's data for who has reacted to messages in channel #general"
-    reaction_message = Message(
-        text=reaction_text,
-        attachments=[reaction_chart]
-    )
-
     activity_chart = PieChart(
-        title="Channel Activity",
+        title="Channel Activity Over the Past 4 Weeks",
         labels=["Last week", "Two weeks ago", "Three weeks ago", "Four weeks ago"],
         values=activity
     )
-    activity_text = "Here's data for your channel's activity in the last four weeks"
-    activity_message = Message(
-        text=activity_text,
-        attachments=[activity_chart]
+    single_message = Message(
+        text="Here's historical data for channel #general",
+        attachments=[message_chart, reaction_chart, activity_chart]
     )
-    
-    slacktastic_client.send_message(message_message)
-    slacktastic_client.send_message(reaction_message)
-    slacktastic_client.send_message(activity_message)
+    slacktastic_client.send_message(single_message)
