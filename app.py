@@ -20,6 +20,5 @@ app = App(
 def history(say):
     on_home_opened(say)
 
-#Don't run ./ngrok http 3000 again, it will deprecate the requests url in Slack and we will have to switch it
 if __name__ == "__main__":
     app.start(port=int(os.environ.get("PORT", 3000)))
