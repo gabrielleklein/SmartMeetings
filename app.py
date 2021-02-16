@@ -26,18 +26,20 @@ app = App(
 def history(say):
     on_home_opened(say)
 
-if __name__ == "__main__":
-    app.start(port=int(os.environ.get("PORT", 3000)))
-
-# Generates API client object dynamically based on service name and version.
+# Generates API client object dynamically based on service name and version
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
-analyze_request = {
-  'comment': { 'text': 'friendly greetings from python' },
-  'requestedAttributes': {'TOXICITY': {}}
-}
+@app.event("messages.channel")
+def flag_toxic_message(event, say):
+    analyze_request = {
+        'comment': { 'text': event['text'] },
+        'requestedAttributes': { 'TOXICITY': {} }
+        }
+    response = service.comments().analyze(body=analyze_request).execute()
+    score = response['attributeScores']['TOXICITY']['summaryScore']['value']
+    if score > .5:
+        say("The helpWe algorithm flagged this message, and we wanted to bring it to your attention.")
+# Add event message to history
 
-response = service.comments().analyze(body=analyze_request).execute()
-
-import json
-print( json.dumps(response, indent=2))
+if __name__ == "__main__":
+    app.start(port=int(os.environ.get("PORT", 3000)))

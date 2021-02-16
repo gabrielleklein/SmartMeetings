@@ -1,10 +1,7 @@
-os #could not install
 slack_bolt
 slack_sdk #already installed from slack_bolt
-slack_sdk.errors #could not install
 pandas
-json #could not install
 jsbeautifier
-re #could not install
+re #could not install, what is this?
 google-api-python-client
 slacktastick

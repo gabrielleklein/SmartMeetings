@@ -9,9 +9,12 @@ from slacktastic.template import PieChart, Message, BarChart
 from slacktastic.client import SlackClient
 from googleapiclient import discovery
 
-client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
-slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL"))
-API_KEY = 'AIzaSyAVBoD5zRdkarsx5f74HSgXVZLAx6EgOks'
+with open('config.json') as json_file:
+    data = json.load(json_file)
+
+client = WebClient(token=os.environ.get(data["SLACK_OAUTH_TOKEN"]))
+slacktastic_client = SlackClient(webhook_url=os.environ.get(data["SLACK_WEBHOOK_URL"]))
+API_KEY = data["GOOGLE_API_KEY"]
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
 def get_channel_message_history_as_df(oldest=0, latest=datetime.datetime.now()):
