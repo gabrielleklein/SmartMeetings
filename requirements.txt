@@ -1,9 +1,10 @@
-os
+os #could not install
 slack_bolt
-slack_sdk
-slack_sdk.errors
+slack_sdk #already installed from slack_bolt
+slack_sdk.errors #could not install
 pandas
-json
+json #could not install
 jsbeautifier
-re
+re #could not install
 google-api-python-client
+slacktastick

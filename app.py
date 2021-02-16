@@ -7,14 +7,18 @@ from slacktastic.template import PieChart, Message
 from slacktastic.client import SlackClient
 from channel_history import on_home_opened
 from googleapiclient import discovery
+import json
 
-client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
-slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL"))
-API_KEY="GOOGLE_API_KEY"
+with open('config.json') as json_file:
+    data = json.load(json_file)
+
+client = WebClient(token=os.environ.get(data["SLACK_OAUTH_TOKEN"]))
+slacktastic_client = SlackClient(webhook_url=os.environ.get(data["SLACK_WEBHOOK_URL"]))
+API_KEY= data["GOOGLE_API_KEY"]
 
 app = App(
-    token=(os.getenv('token1')),
-    signing_secret=(os.getenv('token1'))
+    token=os.environ.get(data["SLACK_BOT_TOKEN"]),
+    signing_secret=os.environ.get(data["SLACK_SIGNING_SECRET"])
 )
 
 #Add event listeners here
