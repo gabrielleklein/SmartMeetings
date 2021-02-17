@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv, find_dotenv
 import pandas as pd
 from slack_bolt import App
 from slack_sdk import WebClient
@@ -8,6 +9,8 @@ from slacktastic.client import SlackClient
 from channel_history import on_home_opened
 from flag_toxic_message import flag_toxic_message
 from googleapiclient import discovery
+
+load_dotenv(find_dotenv())
 
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),

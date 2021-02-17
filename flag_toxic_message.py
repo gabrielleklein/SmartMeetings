@@ -1,6 +1,8 @@
 import os
 from googleapiclient import discovery
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
 API_KEY = os.environ.get("API_KEY")
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
