@@ -8,7 +8,9 @@ from slack_sdk.errors import SlackApiError
 from slacktastic.template import PieChart, Message, BarChart
 from slacktastic.client import SlackClient
 from googleapiclient import discovery
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
 client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
 slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL"))
 API_KEY = os.environ.get("API_KEY")
