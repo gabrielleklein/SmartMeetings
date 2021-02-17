@@ -70,6 +70,7 @@ def analyze_channel_data(messages, users):
             analyze_request = {
                 'comment': { 'text': row['text'] },
                 'requestedAttributes': { 'TOXICITY': {} }
+            }
             response = service.comments().analyze(body=analyze_request).execute()
             score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
             messages.loc[index, "toxicity_score"] = score
