@@ -11,6 +11,5 @@ def flag_toxic_message(event, say):
     }
     response = service.comments().analyze(body=analyze_request).execute()
     score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
-    say(str(score))
     if score > 0.5:
         say("The helpWe algorithm flagged your last message for toxicity, and we wanted to bring it to your attention.")
