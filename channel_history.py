@@ -11,7 +11,7 @@ from googleapiclient import discovery
 
 client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
 slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL"))
-API_KEY = 'AIzaSyAVBoD5zRdkarsx5f74HSgXVZLAx6EgOks'
+API_KEY = os.environ.get("API_KEY")
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
 def get_channel_message_history_as_df(oldest=0, latest=datetime.datetime.now()):
@@ -33,7 +33,7 @@ def get_users_info():
 
 def analyze_channel_data(messages, users):
     #Message + reaction frequency
-    messages = messages.drop(['bot_id', 'bot_link', 'client_msg_id', 'team', 'blocks', 'files', 'upload', 'display_as_bot', 'attachments', 'inviter', 'edited'], axis=1)
+    messages = messages.drop(['bot_id', 'bot_link', 'client_msg_id', 'team', 'blocks', 'files', 'upload', 'display_as_bot', 'attachments'], axis=1)
     users = users.drop(['team_id', 'color', 'tz', 'tz_label', 'tz_offset', 'profile', 'is_restricted', 'is_ultra_restricted', 'is_app_user', 'updated'], axis=1)
     users_filtered = users[users['is_bot'] == False]
     users_filtered.insert(10, "messages_sent", [0,0,0,0,0])
@@ -70,7 +70,6 @@ def analyze_channel_data(messages, users):
             analyze_request = {
                 'comment': { 'text': row['text'] },
                 'requestedAttributes': { 'TOXICITY': {} }
-            }
             response = service.comments().analyze(body=analyze_request).execute()
             score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
             messages.loc[index, "toxicity_score"] = score
