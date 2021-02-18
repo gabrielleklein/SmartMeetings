@@ -12,7 +12,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
-slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL_GENERAL"))
+slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL_APP"))
 API_KEY = os.environ.get("API_KEY")
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
@@ -69,7 +69,7 @@ def analyze_channel_data(messages, users):
 def analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages):
     #Perspective API
     messages.insert(6, "toxicity_score", [0] * len(messages))
-    cut_messages = messages.tail(50) #Only get last 50 messages to stay below limit for now
+    cut_messages = messages.head(50) #Only get most recent 50 messages to stay below limit for now
     for index,row in cut_messages.iterrows():
         try:
             analyze_request = {

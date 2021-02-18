@@ -29,22 +29,45 @@ def flag(event, say):
 @app.command("/message_history")
 def m_command(ack, say, command):
     ack()
+    say("Gathering data on your team's message history...")
     message_history()
 
 @app.command("/reaction_history")
 def r_command(ack, say, command):
     ack()
+    say("Gathering data on your team's reaction history...")
     reaction_history()
 
 @app.command("/activity")
 def a_command(ack, say, command):
     ack()
+    say("Gathering data on your team's activity...")
     activity()
 
-@app.command("toxicity_history")
+@app.command("/toxicity_history")
 def t_command(ack, say, command):
     ack()
     say("Gathering data on your team's toxicity...")
+    toxicity_history()
+
+@app.shortcut("messages_shortcut")
+def m_shortcut(ack, shortcut, client):
+    ack()
+    message_history()    
+
+@app.shortcut("reaction_shortcut")
+def r_shortcut(ack, shortcut, client):
+    ack()
+    reaction_history()
+
+@app.shortcut("activity_shortcut")
+def a_shortcut(ack, shortcut, client):
+    ack()
+    activity()
+
+@app.shortcut("toxicity_shortcut")
+def t_shortcut(ack, shortcut, client):
+    ack()
     toxicity_history()
 
 if __name__ == "__main__":
