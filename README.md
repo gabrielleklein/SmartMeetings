@@ -17,8 +17,8 @@ To do this, add an event subscription here https://api.slack.com/apps/A01LT5D4T7
 Run ./ngrok http 3000 and leave it running, copy the forwarding URL into the event-subscriptions, slash commands, and
 shortcuts (see below), then run app.py.
 
-Event subscriptions: https://api.slack.com/apps/A01LT5D4T7E/event-subscriptions?
-Slash commands: https://api.slack.com/apps/A01LT5D4T7E/slash-commands?
+Event subscriptions: https://api.slack.com/apps/A01LT5D4T7E/event-subscriptions?  
+Slash commands: https://api.slack.com/apps/A01LT5D4T7E/slash-commands?  
 Shortcuts: https://api.slack.com/apps/A01LT5D4T7E/interactive-messages?
 
 ## Authorization Tokens
