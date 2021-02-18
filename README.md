@@ -13,8 +13,13 @@ messages received, app home screen opened, etc. https://slack.dev/bolt-python/tu
 To do this, add an event subscription here https://api.slack.com/apps/A01LT5D4T7E/event-subscriptions?,
 (add bot user event) then add the respective listener (in docs above) into app.py, run the script, and test in Slack.
 
-Note: the Request URL at the above link is where ngrok routes incoming requests from Slack,
-running ./ngrok http 3000 again will change that URL and we will have to change it in Slack.
+## Setup & Running
+Run ./ngrok http 3000 and leave it running, copy the forwarding URL into the event-subscriptions, slash commands, and
+shortcuts (see below), then run app.py.
+
+Event subscriptions: https://api.slack.com/apps/A01LT5D4T7E/event-subscriptions?
+Slash commands: https://api.slack.com/apps/A01LT5D4T7E/slash-commands?
+Shortcuts: https://api.slack.com/apps/A01LT5D4T7E/interactive-messages?
 
 ## Authorization Tokens
 OAuth Token & Bot Token here: https://api.slack.com/apps/A01LT5D4T7E/oauth?  

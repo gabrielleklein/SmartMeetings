@@ -12,7 +12,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
-slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL"))
+slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL_APP"))
 API_KEY = os.environ.get("API_KEY")
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
@@ -20,7 +20,7 @@ def get_channel_message_history_as_df(oldest=0, latest=datetime.datetime.now()):
     conversation_history = []
     channel_id = "C01KC4QD951"
     try:    
-        result = client.conversations_history(channel=channel_id, oldest=oldest, latest=latest)
+        result = client.conversations_history(channel=channel_id, oldest=oldest, latest=latest, limit=0)
         result_messages = result["messages"]
         df = pd.DataFrame(result_messages)
         return df
@@ -35,7 +35,7 @@ def get_users_info():
 
 def analyze_channel_data(messages, users):
     #Message + reaction frequency
-    messages = messages.drop(['bot_id', 'bot_link', 'client_msg_id', 'team', 'blocks', 'files', 'upload', 'display_as_bot', 'attachments'], axis=1)
+    messages = messages.drop(['bot_id', 'bot_link', 'client_msg_id', 'team', 'blocks', 'attachments'], axis=1)
     users = users.drop(['team_id', 'color', 'tz', 'tz_label', 'tz_offset', 'profile', 'is_restricted', 'is_ultra_restricted', 'is_app_user', 'updated'], axis=1)
     users_filtered = users[users['is_bot'] == False]
     users_filtered.insert(10, "messages_sent", [0,0,0,0,0])
@@ -64,10 +64,13 @@ def analyze_channel_data(messages, users):
     three_week_msg_count = len(get_channel_message_history_as_df(oldest=three_week_ts, latest=two_week_ts))
     four_week_msg_count = len(get_channel_message_history_as_df(oldest=four_week_ts, latest=three_week_ts))
     activity = [one_week_msg_count, two_week_msg_count, three_week_msg_count, four_week_msg_count]
+    return count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages
 
+def analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages):
     #Perspective API
     messages.insert(6, "toxicity_score", [0] * len(messages))
-    for index,row in messages.iterrows():
+    cut_messages = messages.head(50) #Only get most recent 50 messages to stay below limit for now
+    for index,row in cut_messages.iterrows():
         try:
             analyze_request = {
                 'comment': { 'text': row['text'] },
@@ -81,10 +84,74 @@ def analyze_channel_data(messages, users):
         except:
             messages.loc[index, "toxicity_score"] = -1
     for user in toxicity_score.keys():
-        toxicity_score[user] = toxicity_score[user] / count_messages[user]
-    
-    return count_messages, count_reactions, id_to_real_name, activity, toxicity_score
+        if count_messages[user] > 0:
+            toxicity_score[user] = toxicity_score[user] / count_messages[user]
+    return toxicity_score
 
+def message_history():
+    messages = get_channel_message_history_as_df()
+    users = get_users_info()
+    count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
+    message_chart = PieChart(
+        title="Channel Participation - Messages",
+        labels=list(id_to_real_name.values()),
+        values=list(count_messages.values())
+    )
+    message = Message(
+        text="Historical message data for channel #general",
+        attachments=[message_chart]
+    )
+    slacktastic_client.send_message(message)
+
+def reaction_history():
+    messages = get_channel_message_history_as_df()
+    users = get_users_info()
+    count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
+    reaction_chart = PieChart(
+        title="Channel Participation - Reactions",
+        labels=list(id_to_real_name.values()),
+        values=list(count_reactions.values())
+    )
+    message = Message(
+        text="Historical reaction data for channel #general",
+        attachments=[reaction_chart]
+    )
+    slacktastic_client.send_message(message)
+
+def activity():
+    messages = get_channel_message_history_as_df()
+    users = get_users_info()
+    count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
+    activity_chart = PieChart(
+        title="Channel Activity Over the Past 4 Weeks",
+        labels=["Last week", "Two weeks ago", "Three weeks ago", "Four weeks ago"],
+        values=activity
+    )
+    message = Message(
+        text="Overall activity data for channel #general",
+        attachments=[activity_chart]
+    )
+    slacktastic_client.send_message(message)
+
+def toxicity_history():
+    messages = get_channel_message_history_as_df()
+    users = get_users_info()
+    count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
+    toxic = analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages)
+    toxicity_chart = BarChart(
+        "Team Members' Toxicity Scores",
+        labels=list(id_to_real_name.values()),
+        data={
+            'Toxicity Score': list(toxic.values())
+        }
+    )
+    message = Message(
+        text="Channel toxicity data for channel #general",
+        attachments=[toxicity_chart]
+    )
+    slacktastic_client.send_message(message)
+
+'''
 def on_home_opened(say):
     messages = get_channel_message_history_as_df()
     users = get_users_info()
@@ -116,3 +183,4 @@ def on_home_opened(say):
         attachments=[message_chart, reaction_chart, activity_chart, toxicity_chart]
     )
     slacktastic_client.send_message(single_message)
+'''
