@@ -6,7 +6,7 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slacktastic.template import PieChart, Message
 from slacktastic.client import SlackClient
-from channel_history import message_history, reaction_history, activity, toxicity_history
+from channel_history import message_history, reaction_history, activity, toxicity_history, update_messages
 from flag_toxic_message import flag_toxic_message
 from googleapiclient import discovery
 
@@ -18,12 +18,13 @@ app = App(
 )
 
 #Add event listeners here
-@app.event("app_home_opened")
-def history(say):
-    say("Hello from helpWe!")
+#@app.event("app_home_opened")
+#def update(say):
+#    say("Hello from helpWe!")
 
 @app.event("message")
 def flag(event, say):
+    update_messages(event, say)
     flag_toxic_message(event, say)
 
 @app.command("/message_history")
