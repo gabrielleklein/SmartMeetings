@@ -20,7 +20,7 @@ def get_channel_message_history_as_df(oldest=0, latest=datetime.datetime.now()):
     conversation_history = []
     channel_id = "C01KC4QD951"
     try:    
-        result = client.conversations_history(channel=channel_id, oldest=oldest, latest=latest, limit=0)
+        result = client.conversations_history(channel=channel_id, oldest=oldest, latest=latest, limit=1000)
         result_messages = result["messages"]
         df = pd.DataFrame(result_messages)
         return df
@@ -35,8 +35,6 @@ def get_users_info():
 
 def analyze_channel_data(messages, users):
     #Message + reaction frequency
-    messages = messages.drop(['bot_id', 'bot_link', 'client_msg_id', 'team', 'blocks', 'attachments'], axis=1)
-    users = users.drop(['team_id', 'color', 'tz', 'tz_label', 'tz_offset', 'profile', 'is_restricted', 'is_ultra_restricted', 'is_app_user', 'updated'], axis=1)
     users_filtered = users[users['is_bot'] == False]
     users_filtered.insert(10, "messages_sent", [0,0,0,0,0])
     users_filtered.insert(11, "reactions_sent", [0,0,0,0,0])
@@ -68,28 +66,19 @@ def analyze_channel_data(messages, users):
 
 def analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages):
     #Perspective API
-    messages.insert(6, "toxicity_score", [0] * len(messages))
-    cut_messages = messages.head(50) #Only get most recent 50 messages to stay below limit for now
-    for index,row in cut_messages.iterrows():
-        try:
-            analyze_request = {
-                'comment': { 'text': row['text'] },
-                'requestedAttributes': { 'TOXICITY': {} }
-            }
-            response = service.comments().analyze(body=analyze_request).execute()
-            score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
-            messages.loc[index, "toxicity_score"] = score
-            if row['user'] in toxicity_score.keys():
-                toxicity_score[row['user']] += score
-        except:
-            messages.loc[index, "toxicity_score"] = -1
+    #cut_messages = messages.head(50) #Only get most recent 50 messages to stay below limit for now
+    for index,row in messages.iterrows():
+        if row['user'] in toxicity_score.keys():
+                toxicity_score[row['user']] += row['toxicity_score']
+
     for user in toxicity_score.keys():
         if count_messages[user] > 0:
             toxicity_score[user] = toxicity_score[user] / count_messages[user]
+
     return toxicity_score
 
 def message_history():
-    messages = get_channel_message_history_as_df()
+    messages = pd.read_csv("messages_history.csv")
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
     message_chart = PieChart(
@@ -119,7 +108,7 @@ def reaction_history():
     slacktastic_client.send_message(message)
 
 def activity():
-    messages = get_channel_message_history_as_df()
+    messages = pd.read_csv("messages_history.csv")
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
     activity_chart = PieChart(
@@ -134,7 +123,7 @@ def activity():
     slacktastic_client.send_message(message)
 
 def toxicity_history():
-    messages = get_channel_message_history_as_df()
+    messages = pd.read_csv("messages_history.csv")
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
     toxic = analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages)
@@ -151,36 +140,35 @@ def toxicity_history():
     )
     slacktastic_client.send_message(message)
 
-'''
-def on_home_opened(say):
-    messages = get_channel_message_history_as_df()
-    users = get_users_info()
-    count_messages, count_reactions, id_to_real_name, activity, toxicity_score = analyze_channel_data(messages, users)
-    message_chart = PieChart(
-        title="Channel Participation - Messages",
-        labels=list(id_to_real_name.values()),
-        values=list(count_messages.values())
-    )
-    reaction_chart = PieChart(
-        title="Channel Participation - Reactions",
-        labels=list(id_to_real_name.values()),
-        values=list(count_reactions.values())
-    )
-    activity_chart = PieChart(
-        title="Channel Activity Over the Past 4 Weeks",
-        labels=["Last week", "Two weeks ago", "Three weeks ago", "Four weeks ago"],
-        values=activity
-    )
-    toxicity_chart = BarChart(
-        "Team Members' Toxicity Scores",
-        labels=list(id_to_real_name.values()),
-        data={
-            'Toxicity Score': list(toxicity_score.values())
-        }
-    )
-    single_message = Message(
-        text="Here's historical data for channel #general",
-        attachments=[message_chart, reaction_chart, activity_chart, toxicity_chart]
-    )
-    slacktastic_client.send_message(single_message)
-'''
+#This has to get entire message history so as to update from messages when the app wasn't running
+def update_messages(event, say):
+    if event['channel'] == "C01KC4QD951":
+        old = pd.read_csv("messages_history.csv")
+        new = get_channel_message_history_as_df()
+        #new.insert(len(new.columns), 'toxicity_score', [0] * len(new))
+        diff = len(new) - len(old)
+        if diff > 0:
+            diff_rows = new.loc[:diff-1]
+            frames = [diff_rows, old]
+            result = pd.concat(frames, ignore_index=True)
+            for index,row in diff_rows.iterrows():
+                try:
+                    analyze_request = {
+                        'comment': { 'text': row['text'] },
+                        'requestedAttributes': { 'TOXICITY': {} }
+                    }
+                    response = service.comments().analyze(body=analyze_request).execute()
+                    score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
+                    result.loc[index, "toxicity_score"] = score
+                except:
+                    result.loc[index, "toxicity_score"] = 0
+            #Remove added columns
+            cols_to_rm = [ele for ele in result.columns if 'Unnamed' in ele]
+            result = result.drop(cols_to_rm, axis=1)
+            result.to_csv("messages_history.csv")
+            #Signal done
+            done = Message(
+                text="Updated DB!",
+                attachments=[]
+            )
+            slacktastic_client.send_message(done)
