@@ -17,7 +17,6 @@ API_KEY = os.environ.get("API_KEY")
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
 def get_channel_message_history_as_df(oldest=0, latest=datetime.datetime.now()):
-    conversation_history = []
     channel_id = "C01KC4QD951"
     try:    
         result = client.conversations_history(channel=channel_id, oldest=oldest, latest=latest, limit=1000)
