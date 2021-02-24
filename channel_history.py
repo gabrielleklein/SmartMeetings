@@ -12,7 +12,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 client = WebClient(token=os.environ.get("SLACK_OAUTH_TOKEN"))
-slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL_APP"))
+slacktastic_client = SlackClient(webhook_url=os.environ.get("SLACK_WEBHOOK_URL_GENERAL"))
 API_KEY = os.environ.get("API_KEY")
 service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 
@@ -65,7 +65,6 @@ def analyze_channel_data(messages, users):
 
 def analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages):
     #Perspective API
-    #cut_messages = messages.head(50) #Only get most recent 50 messages to stay below limit for now
     for index,row in messages.iterrows():
         if row['user'] in toxicity_score.keys():
                 toxicity_score[row['user']] += row['toxicity_score']
@@ -144,7 +143,6 @@ def update_messages(event, say):
     if event['channel'] == "C01KC4QD951":
         old = pd.read_csv("messages_history.csv")
         new = get_channel_message_history_as_df()
-        #new.insert(len(new.columns), 'toxicity_score', [0] * len(new))
         diff = len(new) - len(old)
         if diff > 0:
             diff_rows = new.loc[:diff-1]
@@ -165,9 +163,3 @@ def update_messages(event, say):
             cols_to_rm = [ele for ele in result.columns if 'Unnamed' in ele]
             result = result.drop(cols_to_rm, axis=1)
             result.to_csv("messages_history.csv")
-            #Signal done
-            done = Message(
-                text="Updated DB!",
-                attachments=[]
-            )
-            slacktastic_client.send_message(done)
