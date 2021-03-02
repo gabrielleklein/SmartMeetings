@@ -35,7 +35,7 @@ def is_discussion(channel_id, quiet_members):
     disc_messages = make_messages_array(channel_id, now, oldest)
     # members is a list object of users
     members = make_member_array(channel_id)
-    print(members)
+    
     # counts only messages sent by users (excludes bot messages)
     count_messages = 0
     for message in disc_messages:
@@ -49,10 +49,6 @@ def is_discussion(channel_id, quiet_members):
                 print("This is a bot message")
     return count_messages >= discussion_thresh, quiet_members
 
-channel_id = "C01KC4QD951"
-mem = make_member_array(channel_id)
-print(is_discussion(channel_id, mem))
-
 # checks to see if a discussion prompt has already been sent within two discussion periods
 def is_prompt_sent(channel_id):
     oldest = datetime.datetime.timestamp(now - 2 * delta * discussion_period)
@@ -62,8 +58,6 @@ def is_prompt_sent(channel_id):
         if message['text'] == message_prompt:
             return True
     return False
-
-print(is_prompt_sent(channel_id))
 
 # encourages users who have not participated in two discussion periods to participate in a discussion
 # encourages the last person to send a message too
