@@ -20,7 +20,7 @@ now = datetime.datetime.now()
 # creates an array of conversation members, which will keep track of who needs to be prompted
 def make_member_array(channel_id):
     result = client.conversations_members(channel=channel_id)
-    return result['members']
+    return result['members'][:4]
 
 # creates an array of conversation messages
 def make_messages_array(channel_id, latest, oldest):
@@ -29,25 +29,33 @@ def make_messages_array(channel_id, latest, oldest):
 
 # checks if a the discussion threshold has been reached within the period
 def is_discussion(channel_id, quiet_members):
-    oldest = datetime.datetime.timestamp(now - discussion_period * delta)
+    oldest = datetime.datetime.timestamp(now - delta * discussion_period)
 
     # disc_messages is a list object of messages from the discussion
     disc_messages = make_messages_array(channel_id, now, oldest)
     # members is a list object of users
     members = make_member_array(channel_id)
+    print(members)
     # counts only messages sent by users (excludes bot messages)
     count_messages = 0
     for message in disc_messages:
         for i in range(len(members)):
-            if message['user'] == members[i]:
-                count_messages = count_messages + 1
-                quiet_members[i] = False
-            # removes group member that sent message from quiet members 
-    return count_messages >= discussion_thresh
+            try:
+                if message['user'] == members[i]:
+                    count_messages = count_messages + 1
+                    quiet_members[i] = False
+                # removes group member that sent message from quiet members 
+            except:
+                print("This is a bot message")
+    return count_messages >= discussion_thresh, quiet_members
+
+channel_id = "C01KC4QD951"
+mem = make_member_array(channel_id)
+print(is_discussion(channel_id, mem))
 
 # checks to see if a discussion prompt has already been sent within two discussion periods
 def is_prompt_sent(channel_id):
-    oldest = datetime.datetime.timestamp(now - 2 * discussion_period * delta)
+    oldest = datetime.datetime.timestamp(now - 2 * delta * discussion_period)
 
     messages = make_messages_array(channel_id, now, oldest) 
     for message in messages:
@@ -55,22 +63,19 @@ def is_prompt_sent(channel_id):
             return True
     return False
 
+print(is_prompt_sent(channel_id))
+
 # encourages users who have not participated in two discussion periods to participate in a discussion
 # encourages the last person to send a message too
 def encourage_participation(event, say):
     channel_id = event['channel']
     quiet_members = make_member_array(channel_id)
-    if (is_discussion(channel_id, quiet_members) and not is_prompt_sent(channel_id)):
-        for member in quiet_members:
+    is_disc, quiet = is_discussion(channel_id, quiet_members)
+    if (is_disc and not is_prompt_sent(channel_id)):
+        for member in quiet:
             if member:
                 client.chat_postEphemeral(
                     channel=channel_id,
                     text=message_prompt,
                     user=member
                 )
-        #sends message to user just for testing
-        client.chat_postEphemeral(
-                channel=channel_id,
-                text=message_prompt,
-                user=event['user']
-            )

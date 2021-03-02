@@ -27,7 +27,7 @@ def flag(event, say):
     update_messages(event, say)
     flag_toxic_message(event, say)
     flag_progress_message(event, say)
-    #encourage_participation(event, say)
+    encourage_participation(event, say)
 
 @app.command("/message_history")
 def m_command(ack, say, command):
