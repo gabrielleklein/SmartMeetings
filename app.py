@@ -6,9 +6,9 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slacktastic.template import PieChart, Message
 from slacktastic.client import SlackClient
-from channel_history import message_history, reaction_history, activity, toxicity_history, update_messages
-from flag_toxic_message import flag_toxic_message, flag_progress_message
-from googleapiclient import discovery
+from channel_history import message_history, reaction_history, activity, toxicity_history, update_messages, toxic_messages_sent
+from flag_messages import flag_toxic_message, flag_progress_message
+from discussion_spike import encourage_participation
 
 load_dotenv(find_dotenv())
 
@@ -27,6 +27,7 @@ def flag(event, say):
     update_messages(event, say)
     flag_toxic_message(event, say)
     flag_progress_message(event, say)
+    #encourage_participation(event, say)
 
 @app.command("/message_history")
 def m_command(ack, say, command):
@@ -46,11 +47,17 @@ def a_command(ack, say, command):
     say("Gathering data on your team's activity...")
     activity()
 
-@app.command("/toxicity_history")
+@app.command("/toxicity_scores")
 def t_command(ack, say, command):
     ack()
     say("Gathering data on your team's toxicity...")
     toxicity_history()
+
+@app.command("/toxic_messages_sent")
+def ts_command(ack, say, command):
+    ack()
+    say("Gathering data on your team's toxicity...")
+    toxic_messages_sent()
 
 @app.shortcut("messages_shortcut")
 def m_shortcut(ack, shortcut, client):
@@ -71,6 +78,11 @@ def a_shortcut(ack, shortcut, client):
 def t_shortcut(ack, shortcut, client):
     ack()
     toxicity_history()
+
+@app.shortcut("toxic_messages_sent")
+def ts_shortcut(ack, shortcut, client):
+    ack()
+    toxic_messages_sent()
 
 if __name__ == "__main__":
     app.start(port=int(os.environ.get("PORT", 3000)))

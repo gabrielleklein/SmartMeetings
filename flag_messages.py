@@ -10,18 +10,21 @@ service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 def flag_toxic_message(event, say):
-    analyze_request = {
-        'comment': { 'text':event['text'] },
-        'requestedAttributes': { 'TOXICITY':{} }
-    }
-    response = service.comments().analyze(body=analyze_request).execute()
-    score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
-    if score > 0.75:
-        client.chat_postEphemeral(
-            channel=event['channel'],
-            text="The helpWe algorithm flagged your last message for toxicity, and we wanted to bring it to your attention.",
-            user=event['user']
-        )
+    try:
+        analyze_request = {
+            'comment': { 'text':event['text'] },
+            'requestedAttributes': { 'TOXICITY':{} }
+        }
+        response = service.comments().analyze(body=analyze_request).execute()
+        score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
+        if score > 0.75:
+            client.chat_postEphemeral(
+                channel=event['channel'],
+                text="The helpWe algorithm flagged your last message for toxicity, and we wanted to bring it to your attention.",
+                user=event['user']
+            )
+    except:
+        print("Whoops! Looks like we reached our request limit...")
 
 def flag_progress_message(event, say):
     to_send = "It seems like the team has made some progress, send them some encouragement!"
