@@ -7,8 +7,9 @@ from slack_sdk.errors import SlackApiError
 from slacktastic.template import PieChart, Message
 from slacktastic.client import SlackClient
 from channel_history import message_history, reaction_history, activity, toxicity_history, update_messages
-from flag_toxic_message import flag_toxic_message, flag_progress_message
+from flag_messages import flag_toxic_message, flag_progress_message
 from googleapiclient import discovery
+from discussion_spike import encourage_participation
 
 load_dotenv(find_dotenv())
 
@@ -27,6 +28,7 @@ def flag(event, say):
     update_messages(event, say)
     flag_toxic_message(event, say)
     flag_progress_message(event, say)
+    encourage_participation(event, say)
 
 @app.command("/message_history")
 def m_command(ack, say, command):
