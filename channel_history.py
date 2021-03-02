@@ -35,9 +35,10 @@ def get_users_info():
 def analyze_channel_data(messages, users):
     #Message + reaction frequency
     users_filtered = users[users['is_bot'] == False]
-    users_filtered.insert(10, "messages_sent", [0,0,0,0,0])
-    users_filtered.insert(11, "reactions_sent", [0,0,0,0,0])
-    users_filtered.insert(12, "toxicity_score", [0,0,0,0,0])
+    users_filtered = users_filtered[users_filtered['id'] != 'USLACKBOT']
+    users_filtered.insert(10, "messages_sent", [0,0,0,0])
+    users_filtered.insert(11, "reactions_sent", [0,0,0,0])
+    users_filtered.insert(12, "toxicity_score", [0,0,0,0])
     count_messages = dict(zip(users_filtered.id, users_filtered.messages_sent))
     count_reactions = dict(zip(users_filtered.id, users_filtered.reactions_sent))
     toxicity_score = dict(zip(users_filtered.id, users_filtered.toxicity_score))
@@ -79,10 +80,20 @@ def message_history():
     messages = pd.read_csv("messages_history.csv")
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
+    total_sent = 0
+    vals = {}
+    for count in list(count_messages.values()):
+        total_sent += count
+    for i in range(len(list(id_to_real_name.values()))):
+        count = list(count_messages.values())[i]
+        name = list(id_to_real_name.values())[i]
+        percentage = str(round(count / total_sent * 100, 2))
+        name = name + " - " + percentage + "%"
+        vals[name] = count
     message_chart = PieChart(
         title="Channel Participation - Messages",
-        labels=list(id_to_real_name.values()),
-        values=list(count_messages.values())
+        labels=list(vals.keys()),
+        values=list(vals.values())
     )
     message = Message(
         text="Historical message data for channel #general",
@@ -94,10 +105,20 @@ def reaction_history():
     messages = get_channel_message_history_as_df()
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
+    total_sent = 0
+    vals = {}
+    for count in list(count_reactions.values()):
+        total_sent += count
+    for i in range(len(list(id_to_real_name.values()))):
+        count = list(count_reactions.values())[i]
+        name = list(id_to_real_name.values())[i]
+        percentage = str(round(count / total_sent * 100, 2))
+        name = name + " - " + percentage + "%"
+        vals[name] = count
     reaction_chart = PieChart(
         title="Channel Participation - Reactions",
-        labels=list(id_to_real_name.values()),
-        values=list(count_reactions.values())
+        labels=list(vals.keys()),
+        values=list(vals.values())
     )
     message = Message(
         text="Historical reaction data for channel #general",
@@ -125,16 +146,45 @@ def toxicity_history():
     users = get_users_info()
     count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages, users)
     toxic = analyze_toxicity(messages, id_to_real_name, toxicity_score, count_messages)
+    toxic_values = list(toxic.values())
+    for i in range(len(toxic_values)):
+        toxic_values[i] = round(toxic_values[i] * 10, 1)
     toxicity_chart = BarChart(
-        "Team Members' Toxicity Scores",
+        "Team Members' Toxicity Scores Out of 10",
         labels=list(id_to_real_name.values()),
         data={
-            'Toxicity Score': list(toxic.values())
+            'Toxicity Score': toxic_values
         }
     )
     message = Message(
         text="Channel toxicity data for channel #general",
         attachments=[toxicity_chart]
+    )
+    slacktastic_client.send_message(message)
+
+def toxic_messages_sent():
+    messages_init = pd.read_csv("messages_history.csv")
+    users = get_users_info()
+    count_messages, count_reactions, id_to_real_name, activity, toxicity_score, messages = analyze_channel_data(messages_init, users)
+    toxic_count = {}
+    toxic_count['U01JX5B6WNB'] = 0
+    toxic_count['U01JX5G6SH5'] = 0
+    toxic_count['U01K8RNVC4V'] = 0
+    toxic_count['U01KC4VGPGB'] = 0
+    for index,row in messages.iterrows():
+        if row['user'] in count_messages.keys():
+            if row['toxicity_score'] > 0.5:
+                toxic_count[row['user']] += 1
+    toxic_msg_chart = BarChart(
+        "Number of Toxic Messages sent Per Person",
+        labels=list(id_to_real_name.values()),
+        data={
+            'Toxic Message Count': list(toxic_count.values())
+        }
+    )
+    message = Message(
+        text="Team member's number of toxic messages sent",
+        attachments=[toxic_msg_chart]
     )
     slacktastic_client.send_message(message)
 
