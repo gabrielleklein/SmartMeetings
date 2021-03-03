@@ -13,8 +13,7 @@ message_prompt = "Looks like the channel's filled with busy bees. How about addi
 # number of messages to determine a discussion
 discussion_thresh = 3
 # how long we're defining a discussion in terms of hours
-discussion_period = .5
-delta = datetime.timedelta(hours=1)
+delta = datetime.timedelta(minutes=30)
 now = datetime.datetime.now()
 
 # creates an array of conversation members, which will keep track of who needs to be prompted
@@ -29,7 +28,7 @@ def make_messages_array(channel_id, latest, oldest):
 
 # checks if a the discussion threshold has been reached within the period
 def is_discussion(channel_id, quiet_members):
-    oldest = datetime.datetime.timestamp(now - delta * discussion_period)
+    oldest = datetime.datetime.timestamp(now - delta)
 
     # disc_messages is a list object of messages from the discussion
     disc_messages = make_messages_array(channel_id, now, oldest)
@@ -51,7 +50,7 @@ def is_discussion(channel_id, quiet_members):
 
 # checks to see if a discussion prompt has already been sent within two discussion periods
 def is_prompt_sent(channel_id):
-    oldest = datetime.datetime.timestamp(now - 2 * delta * discussion_period)
+    oldest = datetime.datetime.timestamp(now - 2 * delta)
 
     messages = make_messages_array(channel_id, now, oldest) 
     for message in messages:
