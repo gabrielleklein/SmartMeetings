@@ -9,11 +9,13 @@ from slack_sdk.errors import SlackApiError
 load_dotenv(find_dotenv())
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 
-message_prompt = "Looks like the channel's filled with busy bees. How about adding to the buzz?"
+message_prompt_quiet = "Looks like the channel's filled with busy bees. How about adding to the buzz?"
+message_prompt_not_quiet = "It seems like not everyone has participated in this discussion yet, you should give them a chance!"
+prompt_sent = False
 # number of messages to determine a discussion
 discussion_thresh = 3
 # how long we're defining a discussion in terms of hours
-delta = datetime.timedelta(minutes=30)
+delta = datetime.timedelta(minutes=10)
 now = datetime.datetime.now()
 
 # creates an array of conversation members, which will keep track of who needs to be prompted
@@ -48,27 +50,26 @@ def is_discussion(channel_id, quiet_members):
                 print("This is a bot message")
     return count_messages >= discussion_thresh, quiet_members
 
-# checks to see if a discussion prompt has already been sent within two discussion periods
-def is_prompt_sent(channel_id):
-    oldest = datetime.datetime.timestamp(now - 2 * delta)
-
-    messages = make_messages_array(channel_id, now, oldest) 
-    for message in messages:
-        if message['text'] == message_prompt:
-            return True
-    return False
-
 # encourages users who have not participated in two discussion periods to participate in a discussion
 # encourages the last person to send a message too
 def encourage_participation(event, say):
+    global prompt_sent
     channel_id = event['channel']
     quiet_members = make_member_array(channel_id)
     is_disc, quiet = is_discussion(channel_id, quiet_members)
-    if (is_disc and not is_prompt_sent(channel_id)):
-        for member in quiet:
-            if member:
+    speaking_members = make_member_array(channel_id)
+    if (is_disc and not prompt_sent):
+        for i in range(len(quiet)):
+            if quiet[i]:
                 client.chat_postEphemeral(
                     channel=channel_id,
-                    text=message_prompt,
-                    user=member
+                    text=message_prompt_quiet,
+                    user=quiet[i]
                 )
+            else:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    text=message_prompt_not_quiet,
+                    user=speaking_members[i]
+                )
+            prompt_sent = True
