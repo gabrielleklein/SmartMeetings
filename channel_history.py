@@ -173,7 +173,7 @@ def toxic_messages_sent():
     toxic_count['U01KC4VGPGB'] = 0
     for index,row in messages.iterrows():
         if row['user'] in count_messages.keys():
-            if row['toxicity_score'] > 0.5:
+            if row['toxicity_score'] > 0.75:
                 toxic_count[row['user']] += 1
     toxic_msg_chart = BarChart(
         "Number of Toxic Messages sent Per Person",
