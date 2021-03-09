@@ -13,9 +13,9 @@ message_prompt_quiet = "Looks like the channel's filled with busy bees. How abou
 message_prompt_not_quiet = "It seems like not everyone has participated in this discussion yet, you should give them a chance!"
 prompt_sent = False
 # number of messages to determine a discussion
-discussion_thresh = 3
+discussion_thresh = 10
 # how long we're defining a discussion in terms of hours
-delta = datetime.timedelta(minutes=10)
+delta = datetime.timedelta(minutes=2)
 now = datetime.datetime.now()
 
 # creates an array of conversation members, which will keep track of who needs to be prompted

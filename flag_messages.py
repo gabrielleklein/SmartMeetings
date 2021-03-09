@@ -17,7 +17,7 @@ def flag_toxic_message(event, say):
         }
         response = service.comments().analyze(body=analyze_request).execute()
         score = response['attributeScores']['TOXICITY']['spanScores'][0]['score']['value']
-        if score > 0.75:
+        if score > 0.5:
             client.chat_postEphemeral(
                 channel=event['channel'],
                 text="The helpWe algorithm flagged your last message for toxicity, and we wanted to bring it to your attention.",
@@ -34,37 +34,37 @@ def flag_progress_message(event, say):
                 channel=event['channel'],
                 text=to_send
             )
-        if(re.search((r'complet*'), event['text'])):
+        elif(re.search((r'complet*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
             )
-        if (re.search((r'finish*'), event['text'])):
+        elif (re.search((r'finish*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
             )
-        if (re.search((r'idea*'), event['text'])):
+        elif (re.search((r'idea*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
             )
-        if (re.search((r'done*'), event['text'])):
+        elif (re.search((r'done*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
             )
-        if (re.search((r'accomplish*'), event['text'])):
+        elif (re.search((r'accomplish*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
             )
-        if (re.search((r'accquir*'), event['text'])):
+        elif (re.search((r'accquir*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
             )
-        if (re.search((r'push*'), event['text'])):
+        elif (re.search((r'push*'), event['text'])):
             client.chat_postMessage(
                 channel=event['channel'],
                 text=to_send
