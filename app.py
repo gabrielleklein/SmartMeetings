@@ -17,11 +17,6 @@ app = App(
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
 )
 
-#Add event listeners here
-#@app.event("app_home_opened")
-#def update(say):
-#    say("Hello from helpWe!")
-
 @app.event("message")
 def flag(event, say):
     update_messages(event, say)

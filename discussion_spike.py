@@ -15,10 +15,10 @@ prompt_sent = False
 # number of messages to determine a discussion
 discussion_thresh = 10
 # how long we're defining a discussion in terms of hours
-delta = datetime.timedelta(minutes=2)
+delta = datetime.timedelta(minutes=10)
 now = datetime.datetime.now()
 
-# creates an array of conversation members, which will keep track of who needs to be prompted
+# creates an array of conversation members (people only), which will keep track of who needs to be prompted
 def make_member_array(channel_id):
     result = client.conversations_members(channel=channel_id)
     return result['members'][:4]
